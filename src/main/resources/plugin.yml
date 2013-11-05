@@ -1,0 +1,9 @@
+name: bogger
+version: 0.6
+author: Mete0 <admin@gtn-craft.ru>
+main: ru.maximvarentsov.bogger.BoggerPlugin
+
+permissions:
+    logger.use:
+        description: Allow use bogger plugin
+        default: true
