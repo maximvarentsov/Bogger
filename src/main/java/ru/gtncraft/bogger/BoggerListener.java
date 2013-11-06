@@ -1,4 +1,4 @@
-package ru.maximvarentsov.bogger;
+package ru.gtncraft.bogger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

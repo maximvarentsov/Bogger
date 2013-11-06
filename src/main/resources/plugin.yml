@@ -1,9 +1,9 @@
 name: bogger
-version: 0.6
-author: Mete0 <admin@gtn-craft.ru>
-main: ru.maximvarentsov.bogger.BoggerPlugin
+main: ru.gtncraft.bogger.BoggerPlugin
+author: Maxim Varentsov <admin@gtn-craft.ru>
+version: ${version}
 
 permissions:
-    logger.use:
+    bogger.use:
         description: Allow use bogger plugin
         default: true

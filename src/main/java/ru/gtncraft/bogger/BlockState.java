@@ -1,10 +1,10 @@
-package ru.maximvarentsov.bogger;
+package ru.gtncraft.bogger;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import org.bukkit.Location;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class BlockState extends BasicDBObject {
 
@@ -17,8 +17,8 @@ public class BlockState extends BasicDBObject {
         put("z", loc.getZ());
     }
 
-    public BlockState(DBObject obj) {
-        putAll(obj.toMap());
+    public BlockState(Map map) {
+        putAll(map);
     }
 
     public void setBlock(String value) {

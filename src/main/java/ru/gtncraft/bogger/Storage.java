@@ -1,11 +1,6 @@
-package ru.maximvarentsov.bogger;
+package ru.gtncraft.bogger;
 
-import com.mongodb.MongoClient;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.configuration.ConfigurationSection;
 import java.util.ArrayList;
@@ -16,7 +11,7 @@ public class Storage {
     private DBCollection coll;
     final private int maxResult;
 
-    private BasicDBObject fieldsResult = new BasicDBObject(ImmutableMap.of(
+    private DBObject fieldsResult = new BasicDBObject(ImmutableMap.of(
         "_id", false, "datetime", true, "player", true, "block", true, "action", true
     ));
 
@@ -30,16 +25,16 @@ public class Storage {
         }
     }
 
-    public void insert(BasicDBObject document) {
+    public void insert(DBObject document) {
         coll.insert(document, WriteConcern.SAFE);
     }
 
-    public List<BlockState> find(BlockState query) {
+    public List<BlockState> find(DBObject query) {
         List<BlockState> result = new ArrayList<>(maxResult);
         DBCursor cursor = coll.find(query, fieldsResult);
         cursor.hint("datetime_1").limit(maxResult);
         while (cursor.hasNext()) {
-            result.add(new BlockState(cursor.next()));
+            result.add(new BlockState(cursor.next().toMap()));
         }
         return result;
     }
