@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class BlockState extends BasicDBObject {
 
-    public String format = "dd.MM.yyyy HH:mm:ss";
+    private final static String format = "dd.MM.yyyy HH:mm:ss";
 
     public BlockState(Location loc) {
         put("world", loc.getWorld().getName());
