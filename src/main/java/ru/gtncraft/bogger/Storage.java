@@ -1,21 +1,23 @@
 package ru.gtncraft.bogger;
 
-import com.mongodb.*;
 import com.google.common.collect.ImmutableMap;
+import com.mongodb.*;
 import org.bukkit.configuration.ConfigurationSection;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Storage {
 
-    private DBCollection coll;
-    final private int maxResult;
+    private final DBCollection coll;
+    private final int maxResult;
 
     private DBObject fieldsResult = new BasicDBObject(ImmutableMap.of(
         "_id", false, "datetime", true, "player", true, "block", true, "action", true
     ));
 
-    public Storage(ConfigurationSection config) throws Exception {
+    public Storage(final ConfigurationSection config) throws IOException {
         maxResult = config.getInt("results");
         MongoClient mongoClient = new MongoClient(config.getString("host"), config.getInt("port"));
         DB db = mongoClient.getDB(config.getString("name"));
@@ -25,11 +27,11 @@ public class Storage {
         }
     }
 
-    public void insert(DBObject document) {
+    public void insert(final DBObject document) {
         coll.insert(document, WriteConcern.SAFE);
     }
 
-    public List<BlockState> find(DBObject query) {
+    public List<BlockState> find(final DBObject query) {
         List<BlockState> result = new ArrayList<>(maxResult);
         DBCursor cursor = coll.find(query, fieldsResult);
         cursor.hint("datetime_1").limit(maxResult);

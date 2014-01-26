@@ -1,5 +1,5 @@
-name: bogger
-main: ru.gtncraft.bogger.BoggerPlugin
+name: ${name}
+main: ru.gtncraft.bogger.Bogger
 author: Maxim Varentsov <admin@gtn-craft.ru>
 version: ${version}
 

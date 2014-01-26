@@ -5,3 +5,7 @@ db:
   collection: bogger
   results: 10
 material: YELLOW_FLOWER
+worlds:
+ - world
+ - world_nether
+ - world_the_end

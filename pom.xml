@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>ru.maximvarentsov</groupId>
+    <groupId>ru.gtncraft</groupId>
     <artifactId>Bogger</artifactId>
     <name>Bogger</name>
     <version>0.8</version>
@@ -10,6 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <build>
+        <finalName>${name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -32,24 +33,22 @@
     </build>
     <repositories>
         <repository>
-            <id>bukkit</id>
-            <name>Bukkit Artifactory</name>
-            <layout>default</layout>
+            <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public</url>
         </repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.7.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.2-R0.3-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>2.11.3</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
   </dependencies>
 </project>

@@ -2,12 +2,12 @@ package ru.gtncraft.bogger;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class BoggerPlugin extends JavaPlugin {
+public final class Bogger extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
         try {
-            new BoggerListener(this);
+            new Listeners(this);
         } catch (Exception ex) {
             setEnabled(false);
             getLogger().severe(ex.getMessage());
