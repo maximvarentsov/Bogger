@@ -43,6 +43,7 @@ public class Listeners implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(final BlockBreakEvent event) {
         final Block block = event.getBlock();
+        final Material type = block.getType();
         final String player = event.getPlayer().getName();
         if (isLogging(block)) {
             Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
@@ -50,7 +51,7 @@ public class Listeners implements Listener {
                 public void run() {
                     BlockState state = new BlockState(block.getLocation());
                     state.setDatetime(new Date());
-                    state.setBlock(block.getType());
+                    state.setBlock(type);
                     state.setPlayer(player);
                     state.setAction(-1);
                     st.insert(state);
@@ -62,6 +63,7 @@ public class Listeners implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent event) {
         final Block block = event.getBlock();
+        final Material type = block.getType();
         final String player = event.getPlayer().getName();
         if (isLogging(block)) {
             Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
@@ -69,7 +71,7 @@ public class Listeners implements Listener {
                 public void run() {
                     BlockState state = new BlockState(block.getLocation());
                     state.setDatetime(new Date());
-                    state.setBlock(block.getType());
+                    state.setBlock(type);
                     state.setPlayer(player);
                     state.setAction(1);
                     st.insert(state);
