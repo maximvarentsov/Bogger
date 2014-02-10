@@ -51,7 +51,7 @@ public class Listeners implements Listener {
                     blockStates.add(it.next());
                     it.remove();
                 }
-                st.insert(queue.toArray(new BlockState[queue.size()]));
+                st.insert(blockStates.toArray(new BlockState[blockStates.size()]));
             }
         }, 0L, 40L);
     }
