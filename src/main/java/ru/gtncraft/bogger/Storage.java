@@ -28,7 +28,7 @@ public class Storage {
     }
 
     public void insert(final DBObject document) {
-        coll.insert(document, WriteConcern.SAFE);
+        coll.insert(document);
     }
 
     public List<BlockState> find(final DBObject query) {
