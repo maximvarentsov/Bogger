@@ -46,10 +46,12 @@ public class Listeners implements Listener {
                     return;
                 }
                 Iterator<BlockState> it = queue.iterator();
+                List<BlockState> blockStates = new ArrayList<>(queue.size());
                 while (it.hasNext()) {
-                    st.insert(it.next());
+                    blockStates.add(it.next());
                     it.remove();
                 }
+                st.insert(queue.toArray(new BlockState[queue.size()]));
             }
         }, 0L, 40L);
     }

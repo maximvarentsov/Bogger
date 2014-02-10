@@ -27,7 +27,7 @@ public class Storage {
         }
     }
 
-    public void insert(final DBObject document) {
+    public void insert(final DBObject[] document) {
         coll.insert(document);
     }
 
