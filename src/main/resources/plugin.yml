@@ -1,9 +1,9 @@
-name: ${name}
+name: ${artifactId}
 main: ru.gtncraft.bogger.Bogger
 author: Maxim Varentsov <admin@gtn-craft.ru>
 version: ${version}
 
 permissions:
     bogger.use:
-        description: Allow use bogger plugin
+        description: Разрешить использование логгера.
         default: true
