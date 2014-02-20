@@ -2,31 +2,28 @@ package ru.gtncraft.bogger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
 
 public class Listeners implements Listener {
 
     private final Bogger plugin;
-    private final Storage st;
     private final Material material;
     private final Collection<String> worlds;
-    private final Collection<BlockState> queue;
+    private final Storage storage;
 
-    public Listeners(final Bogger plugin) throws IOException {
-
-        st = new Storage(plugin.getConfig().getConfigurationSection("db"));
-        queue = Collections.synchronizedList(new ArrayList<BlockState>());
+    public Listeners(final Bogger plugin) {
         String materialName = plugin.getConfig().getString("material");
         material = Material.matchMaterial(materialName);
         if (material == null) {
@@ -35,25 +32,10 @@ public class Listeners implements Listener {
 
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
 
-        worlds = (List<String>) plugin.getConfig().getList("worlds");
+        worlds = plugin.getConfig().getStringList("worlds");
 
+        this.storage = plugin.getStorage();
         this.plugin = plugin;
-
-        Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (queue.size() == 0) {
-                    return;
-                }
-                Iterator<BlockState> it = queue.iterator();
-                List<BlockState> blockStates = new ArrayList<>(queue.size());
-                while (it.hasNext()) {
-                    blockStates.add(it.next());
-                    it.remove();
-                }
-                st.insert(blockStates.toArray(new BlockState[blockStates.size()]));
-            }
-        }, 0L, 40L);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -61,11 +43,10 @@ public class Listeners implements Listener {
         final Block block = event.getBlock();
         if (isLogging(block)) {
             BlockState state = new BlockState(block.getLocation());
-            state.setDatetime(new Date());
             state.setBlock(block.getType());
             state.setPlayer(event.getPlayer().getName());
             state.setAction(-1);
-            queue.add(state);
+            storage.queue(block.getWorld(), state);
         }
     }
 
@@ -74,24 +55,23 @@ public class Listeners implements Listener {
         final Block block = event.getBlock();
         if (isLogging(block)) {
             BlockState state = new BlockState(block.getLocation());
-            state.setDatetime(new Date());
             state.setBlock(block.getType());
             state.setPlayer(event.getPlayer().getName());
             state.setAction(1);
-            queue.add(state);
+            storage.queue(block.getWorld(), state);
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         if (player.getItemInHand().getType().equals(material)) {
             if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-                final BlockState query = new BlockState(event.getClickedBlock().getLocation());
+                final Location query = event.getClickedBlock().getLocation().clone();
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        for (BlockState state : st.find(query)) {
+                        for (BlockState state : plugin.getStorage().find(query)) {
                             player.sendMessage(ChatColor.DARK_AQUA + state.toString());
                         }
                     }

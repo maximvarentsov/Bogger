@@ -12,23 +12,19 @@ public class BlockState extends BasicDBObject {
 
     private final static String format = "dd.MM.yyyy HH:mm:ss";
 
-    public BlockState(final Location loc) {
-        put("world", loc.getWorld().getName());
-        put("x", loc.getX());
-        put("y", loc.getY());
-        put("z", loc.getZ());
+    public BlockState(final Location location) {
+        this.put("x", location.getX());
+        this.put("y", location.getY());
+        this.put("z", location.getZ());
+        this.put("_id", System.currentTimeMillis());
     }
 
     public BlockState(final Map map) {
-        putAll(map);
+        this.putAll(map);
     }
 
     public void setBlock(final Material value) {
         put("block", value.name());
-    }
-
-    public void setDatetime(final Date value) {
-        put("datetime", value);
     }
 
     public void setPlayer(final String player) {
@@ -44,7 +40,7 @@ public class BlockState extends BasicDBObject {
     }
 
     public Date getDatetime() {
-        return getDate("datetime");
+        return new Date(getLong("_id"));
     }
 
     public String getPlayer() {

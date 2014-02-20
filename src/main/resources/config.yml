@@ -1,8 +1,7 @@
 db:
   host: localhost
   port: 27017
-  name: minecraft
-  collection: bogger
+  name: bogger
   results: 10
 material: YELLOW_FLOWER
 worlds:

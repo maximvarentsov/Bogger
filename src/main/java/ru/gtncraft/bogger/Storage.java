@@ -2,47 +2,78 @@ package ru.gtncraft.bogger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.*;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Storage {
+public class Storage implements AutoCloseable {
 
-    private final DBCollection coll;
     private final int maxResult;
+    private final MongoClient client;
+    private final DB db;
+    private final Map<String, Collection<BlockState>> queue = new ConcurrentHashMap<>();
 
-    private DBObject fieldsResult = new BasicDBObject(ImmutableMap.of(
-        "_id", false, "datetime", true, "player", true, "block", true, "action", true
-    ));
-
-    public Storage(final ConfigurationSection config) throws IOException {
-        maxResult = config.getInt("results");
-        MongoClient mongoClient = new MongoClient(config.getString("host"), config.getInt("port"));
-        DB db = mongoClient.getDB(config.getString("name"));
-        coll = db.getCollection(config.getString("collection"));
-        if (coll.count() < 1) {
-            ensureIndex();
+    public Storage(final Bogger plugin) throws IOException {
+        this.maxResult = plugin.getConfig().getInt("db.results");
+        this.client = new MongoClient(plugin.getConfig().getString("db.host"), plugin.getConfig().getInt("db.port"));
+        this.db = this.client.getDB(plugin.getConfig().getString("db.name"));
+        for (String world : plugin.getConfig().getStringList("worlds")) {
+            String name = world.toLowerCase();
+            // Create collections and index.
+            if (!db.collectionExists(world)) {
+                DBCollection collection = db.createCollection(name, new BasicDBObject("autoIndexId", false));
+                collection.createIndex(new BasicDBObject("x", 1).append("y", 1).append("z", 1));
+                collection.createIndex(new BasicDBObject("_id", 1));
+            }
+            queue.put(name, new ArrayList<BlockState>());
         }
+        // Flush queue every 40 tick.
+        Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<String, Collection<BlockState>> entry : queue.entrySet()) {
+                    final Collection<BlockState> blockStates = new ArrayList<>(queue.size());
+                    final Iterator<BlockState> it = entry.getValue().iterator();
+                    while (it.hasNext()) {
+                        blockStates.add(it.next());
+                        it.remove();
+                    }
+                    insert(entry.getKey(), blockStates.toArray(new BlockState[blockStates.size()]));
+                }
+            }
+        }, 0L, 40L);
     }
 
-    public void insert(final DBObject[] document) {
-        coll.insert(document);
+    private void insert(final String world, final BlockState[] documents) {
+        DBCollection collection = db.getCollection(world);
+        collection.insert(documents);
     }
 
-    public List<BlockState> find(final DBObject query) {
-        List<BlockState> result = new ArrayList<>(maxResult);
-        DBCursor cursor = coll.find(query, fieldsResult);
-        cursor.hint("datetime_1").limit(maxResult);
-        while (cursor.hasNext()) {
-            result.add(new BlockState(cursor.next().toMap()));
+    public void queue(final World world, final BlockState document) {
+        queue.get(world.getName().toLowerCase()).add(document);
+    }
+
+    public Collection<BlockState> find(final Location location) {
+        Collection<BlockState> result = new LinkedList<>();
+        DBCollection collection = db.getCollection(location.getWorld().getName());
+        DBObject query = new BasicDBObject(ImmutableMap.of(
+            "x", location.getBlockX(), "y", location.getBlockY(), "z", location.getBlockZ()
+        ));
+        try (DBCursor cursor = collection.find(query)) {
+            cursor.sort(new BasicDBObject("_id", -1)).limit(maxResult);
+            while (cursor.hasNext()) {
+                result.add(new BlockState(cursor.next().toMap()));
+            }
         }
         return result;
     }
 
-    private void ensureIndex() {
-        coll.createIndex(new BasicDBObject("world", 1).append("x", 1).append("y", 1).append("z", 1));
-        coll.createIndex(new BasicDBObject("datetime", 1));
+    @Override
+    public void close() throws Exception {
+        client.close();
     }
 }
