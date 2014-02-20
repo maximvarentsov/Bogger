@@ -29,7 +29,16 @@ public class BlockState extends BasicDBObject {
             case LOG_2:
             case WOOD:
             case WOOD_STEP:
+            case SAPLING:
+            case LEAVES:
+            case LEAVES_2:
             case WOOL:
+            case CARPET:
+            case LONG_GRASS:
+            case RED_ROSE:
+            case DOUBLE_PLANT:
+            case ANVIL:
+            case SKULL_ITEM:
             case STAINED_CLAY:
             case STAINED_GLASS:
             case STAINED_GLASS_PANE:
