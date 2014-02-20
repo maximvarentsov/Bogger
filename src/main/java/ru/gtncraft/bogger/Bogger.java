@@ -12,25 +12,20 @@ public final class Bogger extends JavaPlugin {
         saveDefaultConfig();
         try {
             storage = new Storage(this);
+            new Listeners(this, storage);
         } catch (IOException ex) {
             setEnabled(false);
             getLogger().severe(ex.getMessage());
-            return;
         }
-        new Listeners(this);
     }
 
     @Override
     public void onDisable() {
         getServer().getScheduler().cancelTasks(this);
         try {
-            getStorage().close();
+            storage.close();
         } catch (Exception ex) {
             getLogger().severe(ex.getMessage());
         }
-    }
-
-    public Storage getStorage() {
-        return storage;
     }
 }

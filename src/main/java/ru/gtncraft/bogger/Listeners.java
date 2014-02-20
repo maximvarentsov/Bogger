@@ -13,17 +13,16 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class Listeners implements Listener {
 
-    private final Bogger plugin;
     private final Material material;
     private final Storage storage;
+    private final Bogger plugin;
 
-    public Listeners(final Bogger plugin) {
-        String materialName = plugin.getConfig().getString("material");
-        material = Material.matchMaterial(materialName);
+    public Listeners(final Bogger plugin, final Storage storage) {
+        material = Material.matchMaterial(plugin.getConfig().getString("material", Material.YELLOW_FLOWER.name()));
         if (material == null) {
-            throw new IllegalArgumentException("Material not found " + materialName);
+            plugin.getLogger().warning("Logger tool not found or invalid.");
         }
-        this.storage = plugin.getStorage();
+        this.storage = storage;
         this.plugin = plugin;
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -41,22 +40,22 @@ public class Listeners implements Listener {
     public void onBlockPlace(final BlockPlaceEvent event) {
         final Block block = event.getBlock();
         final World world = block.getWorld();
-        if (storage.isLogging(event.getBlock().getWorld())) {
-            storage.queue(world, new BlockState(event.getBlock(), event.getPlayer(), 1));
+        if (storage.isLogging(world)) {
+            storage.queue(world, new BlockState(block, event.getPlayer(), 1));
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     public void onPlayerInteract(final PlayerInteractEvent event) {
-        final Player player = event.getPlayer();
-        if (player.getItemInHand().getType().equals(material)) {
-            if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+            final Player player = event.getPlayer();
+            if (player.getItemInHand().getType() == material) {
                 final World world = player.getWorld();
                 final BlockState query = new BlockState(event.getClickedBlock().getLocation());
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        for (BlockState state : plugin.getStorage().find(world, query)) {
+                        for (BlockState state : storage.find(world, query)) {
                             player.sendMessage(ChatColor.DARK_AQUA + state.toString());
                         }
                     }

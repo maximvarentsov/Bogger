@@ -34,9 +34,9 @@ public class BlockState extends BasicDBObject {
     }
 
     public void setLocation(final Location location) {
-        this.put("x", location.getX());
-        this.put("y", location.getY());
-        this.put("z", location.getZ());
+        put("x", location.getX());
+        put("y", location.getY());
+        put("z", location.getZ());
     }
 
     public void setBlock(final Block block) {

@@ -19,14 +19,14 @@ public class Storage implements AutoCloseable {
         this.client = new MongoClient(plugin.getConfig().getString("db.host"), plugin.getConfig().getInt("db.port"));
         this.db = this.client.getDB(plugin.getConfig().getString("db.name"));
         for (String world : plugin.getConfig().getStringList("worlds")) {
-            String name = world.toLowerCase();
+            world = world.toLowerCase();
             // Create collections and index.
             if (!db.collectionExists(world)) {
-                DBCollection collection = db.createCollection(name, new BasicDBObject("autoIndexId", false));
+                final DBCollection collection = db.createCollection(world, new BasicDBObject("autoIndexId", false));
                 collection.createIndex(new BasicDBObject("x", 1).append("y", 1).append("z", 1));
                 collection.createIndex(new BasicDBObject("_id", 1));
             }
-            queue.put(name, Collections.synchronizedList(new ArrayList<BlockState>()));
+            queue.put(world, Collections.synchronizedList(new ArrayList<BlockState>()));
         }
         // Flush queue every 40 tick.
         Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
@@ -45,8 +45,7 @@ public class Storage implements AutoCloseable {
     }
 
     private void insert(final String world, final BlockState[] documents) {
-        DBCollection collection = db.getCollection(world);
-        collection.insert(documents);
+        db.getCollection(world).insert(documents);
     }
 
     public void queue(final World world, final BlockState document) {
@@ -61,8 +60,8 @@ public class Storage implements AutoCloseable {
         final Collection<BlockState> result = new LinkedList<>();
         final String name = world.getName().toLowerCase();
         if (queue.containsKey(name)) {
-            DBCollection collection = db.getCollection(name);
-            try (DBCursor cursor = collection.find(new BlockState(query))) {
+            final DBCollection collection = db.getCollection(name);
+            try (final DBCursor cursor = collection.find(new BlockState(query))) {
                 cursor.sort(new BasicDBObject("_id", -1)).limit(maxResult);
                 while (cursor.hasNext()) {
                     result.add(new BlockState(cursor.next().toMap()));
