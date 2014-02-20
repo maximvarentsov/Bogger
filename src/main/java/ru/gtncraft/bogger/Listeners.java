@@ -1,9 +1,6 @@
 package ru.gtncraft.bogger;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,13 +11,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.util.Collection;
-
 public class Listeners implements Listener {
 
     private final Bogger plugin;
     private final Material material;
-    private final Collection<String> worlds;
     private final Storage storage;
 
     public Listeners(final Bogger plugin) {
@@ -29,36 +23,26 @@ public class Listeners implements Listener {
         if (material == null) {
             throw new IllegalArgumentException("Material not found " + materialName);
         }
-
-        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-
-        worlds = plugin.getConfig().getStringList("worlds");
-
         this.storage = plugin.getStorage();
         this.plugin = plugin;
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(final BlockBreakEvent event) {
         final Block block = event.getBlock();
-        if (isLogging(block)) {
-            BlockState state = new BlockState(block.getLocation());
-            state.setBlock(block);
-            state.setPlayer(event.getPlayer().getName());
-            state.setAction(-1);
-            storage.queue(block.getWorld(), state);
+        final World world = block.getWorld();
+        if (storage.isLogging(world)) {
+            storage.queue(world, new BlockState(block, event.getPlayer(), -1));
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent event) {
         final Block block = event.getBlock();
-        if (isLogging(block)) {
-            BlockState state = new BlockState(block.getLocation());
-            state.setBlock(block);
-            state.setPlayer(event.getPlayer().getName());
-            state.setAction(1);
-            storage.queue(block.getWorld(), state);
+        final World world = block.getWorld();
+        if (storage.isLogging(event.getBlock().getWorld())) {
+            storage.queue(world, new BlockState(event.getBlock(), event.getPlayer(), 1));
         }
     }
 
@@ -67,11 +51,12 @@ public class Listeners implements Listener {
         final Player player = event.getPlayer();
         if (player.getItemInHand().getType().equals(material)) {
             if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-                final Location query = event.getClickedBlock().getLocation().clone();
+                final World world = player.getWorld();
+                final BlockState query = new BlockState(event.getClickedBlock().getLocation());
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        for (BlockState state : plugin.getStorage().find(query)) {
+                        for (BlockState state : plugin.getStorage().find(world, query)) {
                             player.sendMessage(ChatColor.DARK_AQUA + state.toString());
                         }
                     }
@@ -79,9 +64,5 @@ public class Listeners implements Listener {
                 event.setCancelled(true);
             }
         }
-    }
-
-    private boolean isLogging(final Block block) {
-        return worlds.contains(block.getWorld().getName());
     }
 }

@@ -3,6 +3,7 @@ package ru.gtncraft.bogger;
 import com.mongodb.BasicDBObject;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,15 +13,30 @@ public class BlockState extends BasicDBObject {
 
     private final static String format = "dd.MM.yyyy HH:mm:ss";
 
+    public BlockState(final Block block, final Player player, final int action) {
+        this.setLocation(block.getLocation());
+        this.setBlock(block);
+        this.setPlayer(player);
+        this.setAction(action);
+        this.setDatetime();
+    }
+
     public BlockState(final Location location) {
-        this.put("x", location.getX());
-        this.put("y", location.getY());
-        this.put("z", location.getZ());
-        this.put("_id", System.currentTimeMillis());
+        this.setLocation(location);
     }
 
     public BlockState(final Map map) {
         this.putAll(map);
+    }
+
+    public void setDatetime() {
+        put("_id", System.currentTimeMillis());
+    }
+
+    public void setLocation(final Location location) {
+        this.put("x", location.getX());
+        this.put("y", location.getY());
+        this.put("z", location.getZ());
     }
 
     public void setBlock(final Block block) {
@@ -38,7 +54,6 @@ public class BlockState extends BasicDBObject {
             case RED_ROSE:
             case DOUBLE_PLANT:
             case ANVIL:
-            case SKULL_ITEM:
             case STAINED_CLAY:
             case STAINED_GLASS:
             case STAINED_GLASS_PANE:
@@ -60,8 +75,8 @@ public class BlockState extends BasicDBObject {
 
     }
 
-    public void setPlayer(final String player) {
-        put("player", player);
+    public void setPlayer(final Player player) {
+        put("player", player.getName().toLowerCase());
     }
 
     public void setAction(final int value) {

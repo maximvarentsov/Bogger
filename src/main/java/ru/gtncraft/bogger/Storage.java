@@ -1,21 +1,18 @@
 package ru.gtncraft.bogger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mongodb.*;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage implements AutoCloseable {
 
     private final int maxResult;
     private final MongoClient client;
     private final DB db;
-    private final Map<String, Collection<BlockState>> queue = new ConcurrentHashMap<>();
+    private final Map<String, Collection<BlockState>> queue = new HashMap<>();
 
     public Storage(final Bogger plugin) throws IOException {
         this.maxResult = plugin.getConfig().getInt("db.results");
@@ -29,20 +26,19 @@ public class Storage implements AutoCloseable {
                 collection.createIndex(new BasicDBObject("x", 1).append("y", 1).append("z", 1));
                 collection.createIndex(new BasicDBObject("_id", 1));
             }
-            queue.put(name, new ArrayList<BlockState>());
+            queue.put(name, Collections.synchronizedList(new ArrayList<BlockState>()));
         }
         // Flush queue every 40 tick.
         Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
                 for (Map.Entry<String, Collection<BlockState>> entry : queue.entrySet()) {
-                    final Collection<BlockState> blockStates = new ArrayList<>(queue.size());
-                    final Iterator<BlockState> it = entry.getValue().iterator();
-                    while (it.hasNext()) {
-                        blockStates.add(it.next());
+                    final Collection<BlockState> values = new ArrayList<>();
+                    for (Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext(); ) {
+                        values.add(it.next());
                         it.remove();
                     }
-                    insert(entry.getKey(), blockStates.toArray(new BlockState[blockStates.size()]));
+                    insert(entry.getKey(), values.toArray(new BlockState[values.size()]));
                 }
             }
         }, 0L, 40L);
@@ -57,16 +53,20 @@ public class Storage implements AutoCloseable {
         queue.get(world.getName().toLowerCase()).add(document);
     }
 
-    public Collection<BlockState> find(final Location location) {
-        Collection<BlockState> result = new LinkedList<>();
-        DBCollection collection = db.getCollection(location.getWorld().getName());
-        DBObject query = new BasicDBObject(ImmutableMap.of(
-            "x", location.getBlockX(), "y", location.getBlockY(), "z", location.getBlockZ()
-        ));
-        try (DBCursor cursor = collection.find(query)) {
-            cursor.sort(new BasicDBObject("_id", -1)).limit(maxResult);
-            while (cursor.hasNext()) {
-                result.add(new BlockState(cursor.next().toMap()));
+    public boolean isLogging(final World world) {
+        return queue.containsKey(world.getName().toLowerCase());
+    }
+
+    public Collection<BlockState> find(final World world, final BlockState query) {
+        final Collection<BlockState> result = new LinkedList<>();
+        final String name = world.getName().toLowerCase();
+        if (queue.containsKey(name)) {
+            DBCollection collection = db.getCollection(name);
+            try (DBCursor cursor = collection.find(new BlockState(query))) {
+                cursor.sort(new BasicDBObject("_id", -1)).limit(maxResult);
+                while (cursor.hasNext()) {
+                    result.add(new BlockState(cursor.next().toMap()));
+                }
             }
         }
         return result;
