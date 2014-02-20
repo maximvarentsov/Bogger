@@ -43,7 +43,7 @@ public class Listeners implements Listener {
         final Block block = event.getBlock();
         if (isLogging(block)) {
             BlockState state = new BlockState(block.getLocation());
-            state.setBlock(block.getType());
+            state.setBlock(block);
             state.setPlayer(event.getPlayer().getName());
             state.setAction(-1);
             storage.queue(block.getWorld(), state);
@@ -55,7 +55,7 @@ public class Listeners implements Listener {
         final Block block = event.getBlock();
         if (isLogging(block)) {
             BlockState state = new BlockState(block.getLocation());
-            state.setBlock(block.getType());
+            state.setBlock(block);
             state.setPlayer(event.getPlayer().getName());
             state.setAction(1);
             storage.queue(block.getWorld(), state);

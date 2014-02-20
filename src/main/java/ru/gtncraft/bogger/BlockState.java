@@ -2,7 +2,7 @@ package ru.gtncraft.bogger;
 
 import com.mongodb.BasicDBObject;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,8 +23,32 @@ public class BlockState extends BasicDBObject {
         this.putAll(map);
     }
 
-    public void setBlock(final Material value) {
-        put("block", value.name());
+    public void setBlock(final Block block) {
+        switch (block.getType()) {
+            case LOG:
+            case LOG_2:
+            case WOOD:
+            case WOOD_STEP:
+            case WOOL:
+            case STAINED_CLAY:
+            case STAINED_GLASS:
+            case STAINED_GLASS_PANE:
+            case SMOOTH_BRICK:
+            case MONSTER_EGGS:
+            case SANDSTONE:
+            case COBBLE_WALL:
+            case STEP:
+            case QUARTZ_BLOCK:
+            case DIRT: // DIRT:2 - podzol
+            case SAND: // SAND:2 - red sand
+                if (block.getData() > 0) {
+                    put("block", block.getType().name() + ":" + block.getData());
+                    break;
+                }
+            default:
+                put("block", block.getType().name());
+        }
+
     }
 
     public void setPlayer(final String player) {
