@@ -3,7 +3,6 @@ package ru.gtncraft.bogger;
 import com.mongodb.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -34,7 +33,7 @@ public class Storage implements AutoCloseable {
             public void run() {
                 for (Map.Entry<String, Collection<BlockState>> entry : queue.entrySet()) {
                     final Collection<BlockState> values = new ArrayList<>();
-                    for (Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext(); ) {
+                    for (final Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext(); ) {
                         values.add(it.next());
                         it.remove();
                     }

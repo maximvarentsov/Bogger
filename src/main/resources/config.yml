@@ -3,7 +3,7 @@ db:
   port: 27017
   name: bogger
   results: 10
-material: YELLOW_FLOWER
+tool: YELLOW_FLOWER
 worlds:
  - world
  - world_nether

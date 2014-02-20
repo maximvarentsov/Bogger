@@ -11,14 +11,17 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.text.SimpleDateFormat;
+
 public class Listeners implements Listener {
 
     private final Material material;
     private final Storage storage;
     private final Bogger plugin;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     public Listeners(final Bogger plugin, final Storage storage) {
-        material = Material.matchMaterial(plugin.getConfig().getString("material", Material.YELLOW_FLOWER.name()));
+        material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
         if (material == null) {
             plugin.getLogger().warning("Logger tool not found or invalid.");
         }
@@ -55,8 +58,12 @@ public class Listeners implements Listener {
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        for (BlockState state : storage.find(world, query)) {
-                            player.sendMessage(ChatColor.DARK_AQUA + state.toString());
+                        for (final BlockState state : storage.find(world, query)) {
+                            String message = dateFormat.format(state.getDatetime()) + " ";
+                            message += state.getPlayer() + " ";
+                            message += state.getBlock() + " ";
+                            message += state.getAction() > 0 ? "place" : "break";
+                            player.sendMessage(ChatColor.DARK_AQUA + message);
                         }
                     }
                 });
