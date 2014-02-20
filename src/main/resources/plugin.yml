@@ -1,5 +1,5 @@
 name: ${artifactId}
-main: ru.gtncraft.bogger.Bogger
+main: ${groupId}.${artifactId}
 author: Maxim Varentsov <admin@gtn-craft.ru>
 version: ${version}
 
