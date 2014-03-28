@@ -31,6 +31,7 @@ public class Listeners implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    @SuppressWarnings("unused")
     public void onBlockBreak(final BlockBreakEvent event) {
         final Block block = event.getBlock();
         final World world = block.getWorld();
@@ -40,6 +41,7 @@ public class Listeners implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    @SuppressWarnings("unused")
     public void onBlockPlace(final BlockPlaceEvent event) {
         final Block block = event.getBlock();
         final World world = block.getWorld();
@@ -49,6 +51,7 @@ public class Listeners implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    @SuppressWarnings("unused")
     public void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             final Player player = event.getPlayer();
