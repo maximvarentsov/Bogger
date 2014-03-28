@@ -58,16 +58,13 @@ public class Listeners implements Listener {
             if (player.getItemInHand().getType() == material) {
                 final World world = player.getWorld();
                 final BlockState query = new BlockState(event.getClickedBlock().getLocation());
-                Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        for (final BlockState state : storage.find(world, query)) {
-                            String message = dateFormat.format(state.getDatetime()) + " ";
-                            message += state.getPlayer() + " ";
-                            message += state.getBlock() + " ";
-                            message += state.getAction() > 0 ? "place" : "break";
-                            player.sendMessage(ChatColor.DARK_AQUA + message);
-                        }
+                Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+                    for (final BlockState state : storage.find(world, query)) {
+                        String message = dateFormat.format(state.getDatetime()) + " ";
+                        message += state.getPlayer() + " ";
+                        message += state.getBlock() + " ";
+                        message += state.getAction() > 0 ? "place" : "break";
+                        player.sendMessage(ChatColor.DARK_AQUA + message);
                     }
                 });
                 event.setCancelled(true);
