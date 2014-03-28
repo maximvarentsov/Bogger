@@ -1,13 +1,14 @@
 package ru.gtncraft.bogger;
 
-import com.mongodb.BasicDBObject;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.mongodb.Document;
+
 import java.util.Date;
 import java.util.Map;
 
-public class BlockState extends BasicDBObject {
+public class BlockState extends Document {
 
     public BlockState(final Block block, final Player player, final int action) {
         this.setLocation(block.getLocation());
@@ -64,6 +65,6 @@ public class BlockState extends BasicDBObject {
     }
 
     public int getAction() {
-        return getInt("action");
+        return getInteger("action");
     }
 }

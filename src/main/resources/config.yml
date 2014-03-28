@@ -1,8 +1,7 @@
-db:
-  host: localhost
-  port: 27017
+storage:
+  host: localhost:27017
   name: bogger
-  results: 10
+results: 10
 tool: YELLOW_FLOWER
 worlds:
  - world

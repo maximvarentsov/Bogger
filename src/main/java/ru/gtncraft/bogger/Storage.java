@@ -1,8 +1,10 @@
 package ru.gtncraft.bogger;
 
-import com.mongodb.*;
-import org.bukkit.Bukkit;
+import com.google.common.collect.ImmutableList;
 import org.bukkit.World;
+import org.mongodb.*;
+import org.mongodb.connection.ServerAddress;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -10,66 +12,48 @@ public class Storage implements AutoCloseable {
 
     private final int maxResult;
     private final MongoClient client;
-    private final DB db;
-    private final Map<String, Collection<BlockState>> queue = new HashMap<>();
+    private final MongoDatabase db;
 
     public Storage(final Bogger plugin) throws IOException {
-        this.maxResult = plugin.getConfig().getInt("db.results");
-        this.client = new MongoClient(plugin.getConfig().getString("db.host"), plugin.getConfig().getInt("db.port"));
-        this.db = this.client.getDB(plugin.getConfig().getString("db.name"));
-        for (String world : plugin.getConfig().getStringList("worlds")) {
-            world = world.toLowerCase();
-            // Create collections and index.
-            if (!db.collectionExists(world)) {
-                final DBCollection collection = db.createCollection(world, new BasicDBObject("autoIndexId", false));
-                collection.createIndex(new BasicDBObject("x", 1).append("y", 1).append("z", 1));
-                collection.createIndex(new BasicDBObject("_id", 1));
-            }
-            queue.put(world, Collections.synchronizedList(new ArrayList<>()));
-        }
-        // Flush queue every 40 tick.
-        Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                for (Map.Entry<String, Collection<BlockState>> entry : queue.entrySet()) {
-                    final Collection<BlockState> values = new ArrayList<>();
-                    for (final Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext(); ) {
-                        values.add(it.next());
-                        it.remove();
-                    }
-                    insert(entry.getKey(), values.toArray(new BlockState[values.size()]));
-                }
-            }
-        }, 0L, 40L);
+
+        maxResult = plugin.getConfig().getInt("results");
+
+        client = MongoClients.create(
+            new ServerAddress(plugin.getConfig().getString("storage.host"))
+        );
+
+        db = client.getDatabase(plugin.getConfig().getString("storage.name"));
+
+        // Create index for collections.
+        plugin.getConfig().getWorlds().forEach(world ->
+            getCollection(world).tools().createIndexes(ImmutableList.of(
+                    Index.builder().addKey("x").addKey("y").addKey("z").build(),
+                    Index.builder().addKey("_id").build()
+            ))
+        );
     }
 
-    private void insert(final String world, final BlockState[] documents) {
-        // FIXME!!!
+    public void insert(final String world, final Collection<BlockState> documents) {
         try {
-            db.getCollection(world).insert(documents);
-        } catch (MongoException.DuplicateKey ex) {
+            db.getCollection(world).insert((List) documents);
+        } catch (MongoDuplicateKeyException ex) {
+
         }
     }
 
-    public void queue(final World world, final BlockState document) {
-        queue.get(world.getName().toLowerCase()).add(document);
+    public MongoCollection getCollection(final World world) {
+        return db.getCollection(world.getName());
     }
 
-    public boolean isLogging(final World world) {
-        return queue.containsKey(world.getName().toLowerCase());
+    public MongoCollection getCollection(final String world) {
+        return db.getCollection(world);
     }
 
     public Collection<BlockState> find(final World world, final BlockState query) {
-        final Collection<BlockState> result = new LinkedList<>();
-        final String name = world.getName().toLowerCase();
-        if (queue.containsKey(name)) {
-            final DBCollection collection = db.getCollection(name);
-            try (final DBCursor cursor = collection.find(new BlockState(query))) {
-                cursor.sort(new BasicDBObject("_id", -1)).limit(maxResult);
-                while (cursor.hasNext()) {
-                    result.add(new BlockState(cursor.next().toMap()));
-                }
-            }
+        Collection<BlockState> result = new LinkedList<>();
+        try (MongoCursor cursor = getCollection(world).
+                                  find(query).sort(new Document("_id", -1)).limit(maxResult).get()) {
+            cursor.forEachRemaining(v -> result.add(new BlockState((Document) v)));
         }
         return result;
     }
