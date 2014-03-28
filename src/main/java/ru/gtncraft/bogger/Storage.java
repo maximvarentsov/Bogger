@@ -25,7 +25,7 @@ public class Storage implements AutoCloseable {
                 collection.createIndex(new BasicDBObject("x", 1).append("y", 1).append("z", 1));
                 collection.createIndex(new BasicDBObject("_id", 1));
             }
-            queue.put(world, Collections.synchronizedList(new ArrayList<BlockState>()));
+            queue.put(world, Collections.synchronizedList(new ArrayList<>()));
         }
         // Flush queue every 40 tick.
         Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
@@ -44,7 +44,11 @@ public class Storage implements AutoCloseable {
     }
 
     private void insert(final String world, final BlockState[] documents) {
-        db.getCollection(world).insert(documents);
+        // FIXME!!!
+        try {
+            db.getCollection(world).insert(documents);
+        } catch (MongoException.DuplicateKey ex) {
+        }
     }
 
     public void queue(final World world, final BlockState document) {
