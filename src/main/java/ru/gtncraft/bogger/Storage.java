@@ -36,7 +36,7 @@ public class Storage implements AutoCloseable {
     public void insert(final String world, final Collection<BlockState> documents) {
         try {
             db.getCollection(world).insert((List) documents);
-        } catch (MongoDuplicateKeyException ex) {
+        } catch (MongoDuplicateKeyException ignore) {
 
         }
     }
