@@ -6,7 +6,7 @@ import java.util.*;
 
 public class BlockQueue {
 
-    private final Map<String, Collection<BlockState>> values = new HashMap<>();
+    final Map<String, Collection<BlockState>> values = new HashMap<>();
 
     public BlockQueue(final Collection<String> worlds) {
         worlds.stream().forEach(w ->

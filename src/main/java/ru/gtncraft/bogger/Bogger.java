@@ -4,9 +4,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Bogger extends JavaPlugin {
 
-    private Storage storage;
-    private BlockQueue queue;
-    private Config config;
+    Storage storage;
+    BlockQueue queue;
+    Config config;
 
     @Override
     public void onEnable() {

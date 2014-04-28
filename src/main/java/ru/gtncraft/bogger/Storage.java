@@ -10,9 +10,9 @@ import java.util.*;
 
 public class Storage implements AutoCloseable {
 
-    private final int maxResult;
-    private final MongoClient client;
-    private final MongoDatabase db;
+    final int maxResult;
+    final MongoClient client;
+    final MongoDatabase db;
 
     public Storage(final Bogger plugin) throws IOException {
 
@@ -36,9 +36,7 @@ public class Storage implements AutoCloseable {
     public void insert(final String world, final Collection<BlockState> documents) {
         try {
             db.getCollection(world).insert((List) documents);
-        } catch (MongoDuplicateKeyException ignore) {
-
-        }
+        } catch (MongoDuplicateKeyException ignore) {}
     }
 
     public MongoCollection getCollection(final World world) {
