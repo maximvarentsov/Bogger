@@ -1,5 +1,6 @@
 package ru.gtncraft.bogger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -7,6 +8,7 @@ import org.mongodb.Document;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 public class BlockState extends Document {
 
@@ -45,7 +47,7 @@ public class BlockState extends Document {
     }
 
     public void setPlayer(final Player player) {
-        put("player", player.getName().toLowerCase());
+        put("uuid", player.getUniqueId());
     }
 
     public void setAction(final int value) {
@@ -61,7 +63,7 @@ public class BlockState extends Document {
     }
 
     public String getPlayer() {
-        return getString("player");
+        return Bukkit.getOfflinePlayer(UUID.fromString(getString("uuid"))).getName();
     }
 
     public int getAction() {
