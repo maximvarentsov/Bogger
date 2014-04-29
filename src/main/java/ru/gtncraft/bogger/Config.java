@@ -4,9 +4,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.mongodb.connection.ServerAddress;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Config extends YamlConfiguration {
 
@@ -19,7 +19,7 @@ public class Config extends YamlConfiguration {
         return getStringList("storage.hosts").stream().map(ServerAddress::new).collect(Collectors.toList());
     }
 
-    public Collection<String> getWorlds() {
-        return getStringList("worlds").stream().map(String::toLowerCase).collect(Collectors.toList());
+    public Stream<String> getWorlds() {
+        return getStringList("worlds").stream().map(String::toLowerCase);
     }
 }

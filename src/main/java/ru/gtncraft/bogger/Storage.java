@@ -23,13 +23,14 @@ public class Storage implements AutoCloseable {
 
         db = client.getDatabase(plugin.getConfig().getString("storage.name"));
 
-        // Create index for collections.
-        plugin.getConfig().getWorlds().forEach(world ->
-            getCollection(world).tools().createIndexes(ImmutableList.of(
-                    Index.builder().addKey("x").addKey("y").addKey("z").build(),
-                    Index.builder().addKey("_id").build()
-            ))
-        );
+        plugin.getConfig().getWorlds().forEach(this::createIndexes);
+    }
+
+    public void createIndexes(final String world) {
+        getCollection(world).tools().createIndexes(ImmutableList.of(
+            Index.builder().addKey("x").addKey("y").addKey("z").build(),
+            Index.builder().addKey("_id").build()
+        ));
     }
 
     public void insert(final String world, final Collection<BlockState> documents) {
