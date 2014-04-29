@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-public class BlockState extends Document {
+class BlockState extends Document {
 
     public BlockState(final Block block, final Player player, final int action) {
         this.setLocation(block.getLocation());

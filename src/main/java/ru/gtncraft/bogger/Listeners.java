@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.text.SimpleDateFormat;
 
-public class Listeners implements Listener {
+class Listeners implements Listener {
 
     final Material material;
     final Bogger plugin;

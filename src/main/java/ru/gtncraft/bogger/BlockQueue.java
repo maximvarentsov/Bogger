@@ -5,7 +5,7 @@ import org.bukkit.World;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class BlockQueue {
+class BlockQueue {
 
     final Map<String, Collection<BlockState>> values = new HashMap<>();
 

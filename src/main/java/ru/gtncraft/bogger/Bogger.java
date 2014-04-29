@@ -46,11 +46,11 @@ public final class Bogger extends JavaPlugin {
         return config;
     }
 
-    public Storage getStorage() {
+    Storage getStorage() {
         return storage;
     }
 
-    public BlockQueue getQueue() {
+    BlockQueue getQueue() {
         return queue;
     }
 }
