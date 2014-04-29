@@ -15,8 +15,8 @@ public class Config extends YamlConfiguration {
         this.addDefaults(config.getRoot());
     }
 
-    public List<ServerAddress> getHosts() {
-        return getStringList("storage.hosts").stream().map(ServerAddress::new).collect(Collectors.toList());
+    public Stream<ServerAddress> getHosts() {
+        return getStringList("storage.hosts").stream().map(ServerAddress::new);
     }
 
     public Stream<String> getWorlds() {

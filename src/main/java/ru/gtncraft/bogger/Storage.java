@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Storage implements AutoCloseable {
 
@@ -19,7 +20,7 @@ public class Storage implements AutoCloseable {
 
         maxResult = plugin.getConfig().getInt("results");
 
-        client = MongoClients.create(plugin.getConfig().getHosts());
+        client = MongoClients.create(plugin.getConfig().getHosts().collect(Collectors.toList()));
 
         db = client.getDatabase(plugin.getConfig().getString("storage.name"));
 
