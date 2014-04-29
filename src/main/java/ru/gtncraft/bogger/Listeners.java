@@ -55,7 +55,7 @@ class Listeners implements Listener {
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
                     for (BlockState state : plugin.getStorage().find(world, query)) {
                         String message = dateFormat.format(state.getDatetime()) + " ";
-                        message += state.getPlayer() + " ";
+                        message += state.getPlayer().getName() + " ";
                         message += state.getBlock() + " ";
                         message += state.getAction() > 0 ? "place" : "break";
                         player.sendMessage(ChatColor.DARK_AQUA + message);

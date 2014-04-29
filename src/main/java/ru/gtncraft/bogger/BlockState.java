@@ -2,6 +2,7 @@ package ru.gtncraft.bogger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.mongodb.Document;
@@ -62,8 +63,8 @@ class BlockState extends Document {
         return new Date(getLong("_id"));
     }
 
-    public String getPlayer() {
-        return Bukkit.getOfflinePlayer(UUID.fromString(getString("uuid"))).getName();
+    public OfflinePlayer getPlayer() {
+        return Bukkit.getOfflinePlayer(UUID.fromString(getString("uuid")));
     }
 
     public int getAction() {
