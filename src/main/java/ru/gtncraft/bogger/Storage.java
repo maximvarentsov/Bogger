@@ -3,6 +3,7 @@ package ru.gtncraft.bogger;
 import com.google.common.collect.ImmutableList;
 import org.bukkit.World;
 import org.mongodb.*;
+import org.mongodb.connection.ServerAddress;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -20,9 +21,12 @@ class Storage implements AutoCloseable {
 
         maxResult = plugin.getConfig().getInt("results");
 
-        client = MongoClients.create(plugin.getConfig().getHosts().collect(Collectors.toList()));
+        client = MongoClients.create(
+                plugin.getConfig().getHosts().map(ServerAddress::new).collect(Collectors.toList()),
+                MongoClientOptions.builder().SSLEnabled(plugin.getConfig().getSSL()).build()
+        );
 
-        db = client.getDatabase(plugin.getConfig().getString("storage.name"));
+        db = client.getDatabase(plugin.getConfig().getDatabase());
 
         plugin.getConfig().getWorlds().forEach(this::createIndexes);
     }
