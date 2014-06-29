@@ -1,73 +1,74 @@
 package ru.gtncraft.bogger;
 
+import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.mongodb.ConvertibleToDocument;
 import org.mongodb.Document;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-class BlockState extends Document {
+class BlockState implements ConvertibleToDocument {
+
+    final Document document;
+
+    public BlockState(final Map<String, Object> map) {
+        document = new Document(map);
+    }
 
     public BlockState(final Block block, final Player player, final int action) {
+        document = new Document("_id", new ObjectId());
         this.setLocation(block.getLocation());
         this.setBlock(block);
         this.setPlayer(player);
         this.setAction(action);
-        this.setDatetime();
     }
 
-    public BlockState(final Location location) {
-        this.setLocation(location);
+    void setLocation(final Location location) {
+        document.put("x", location.getX());
+        document.put("y", location.getY());
+        document.put("z", location.getZ());
     }
 
-    public BlockState(final Map map) {
-        this.putAll(map);
+    void setPlayer(final Player player) {
+        document.put("uuid", player.getUniqueId().toString());
     }
 
-    public void setDatetime() {
-        put("_id", System.currentTimeMillis());
+    void setAction(int value) {
+        document.put("action", value);
     }
 
-    public void setLocation(final Location location) {
-        put("x", location.getX());
-        put("y", location.getY());
-        put("z", location.getZ());
-    }
-
-    public void setBlock(final Block block) {
+    void setBlock(final Block block) {
         if (block.getData() > 0) {
-            put("block", block.getType().name() + ":" + block.getData());
+            document.put("block", block.getType().name() + ":" + block.getData());
         } else {
-            put("block", block.getType().name());
+            document.put("block", block.getType().name());
         }
     }
 
-    public void setPlayer(final Player player) {
-        put("uuid", player.getUniqueId());
-    }
-
-    public void setAction(final int value) {
-        put("action", value);
-    }
-
     public String getBlock() {
-        return getString("block");
+        return document.getString("block");
     }
 
-    public Date getDatetime() {
-        return new Date(getLong("_id"));
+    public Date getDate() {
+        return document.getObjectId("_id").getDate();
     }
 
     public OfflinePlayer getPlayer() {
-        return Bukkit.getOfflinePlayer(UUID.fromString(getString("uuid")));
+        return Bukkit.getOfflinePlayer(UUID.fromString(document.getString("uuid")));
     }
 
     public int getAction() {
-        return getInteger("action");
+        return document.getInteger("action");
+    }
+
+    @Override
+    public Document toDocument() {
+        return document;
     }
 }

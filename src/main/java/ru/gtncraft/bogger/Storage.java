@@ -1,15 +1,17 @@
 package ru.gtncraft.bogger;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.mongodb.*;
 import org.mongodb.connection.ServerAddress;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class Storage implements AutoCloseable {
 
@@ -21,8 +23,13 @@ class Storage implements AutoCloseable {
 
         maxResult = plugin.getConfig().getInt("results");
 
+        List<ServerAddress> hosts = new ArrayList<>();
+        for (String host : plugin.getConfig().getHosts()) {
+            hosts.add(new ServerAddress(host));
+        }
+
         client = MongoClients.create(
-                plugin.getConfig().getHosts().map(ServerAddress::new).collect(Collectors.toList()),
+                hosts,
                 MongoClientOptions.builder().SSLEnabled(plugin.getConfig().getSSL()).build()
         );
 
@@ -33,15 +40,14 @@ class Storage implements AutoCloseable {
 
     public void createIndexes(final String world) {
         getCollection(world).tools().createIndexes(ImmutableList.of(
-            Index.builder().addKey("x").addKey("y").addKey("z").build(),
-            Index.builder().addKey("_id").build()
+            Index.builder().addKey("x").addKey("y").addKey("z").build()
         ));
     }
 
     public void insert(final String world, final Collection<BlockState> documents) {
-        try {
-            db.getCollection(world).insert((List) documents);
-        } catch (MongoDuplicateKeyException ignore) {}
+        for (BlockState bs : documents) {
+            db.getCollection(world).insert(bs.toDocument());
+        }
     }
 
     public MongoCollection getCollection(final World world) {
@@ -52,13 +58,24 @@ class Storage implements AutoCloseable {
         return db.getCollection(world);
     }
 
-    public Collection<BlockState> find(final World world, final BlockState query) {
+    public Collection<BlockState> find(final Location location) {
         Collection<BlockState> result = new LinkedList<>();
-        try (MongoCursor cursor = getCollection(world).
-                                  find(query).sort(new Document("_id", -1)).limit(maxResult).get()) {
-            cursor.forEachRemaining(v -> result.add(new BlockState((Document) v)));
+
+        try (MongoCursor cursor = getCollection(location.getWorld()).find(getQuery(location)).sort(new Document("_id", -1)).limit(maxResult).get()) {
+            while (cursor.hasNext()) {
+                result.add(new BlockState((Document) cursor.next()));
+            }
         }
+
         return result;
+    }
+
+    Document getQuery(final Location location) {
+        return new Document(ImmutableMap.of(
+                "x", location.getBlockX(),
+                "y", location.getBlockY(),
+                "z", location.getBlockZ()
+        ));
     }
 
     @Override

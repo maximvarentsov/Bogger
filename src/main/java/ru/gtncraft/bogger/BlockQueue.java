@@ -3,13 +3,12 @@ package ru.gtncraft.bogger;
 import org.bukkit.World;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 class BlockQueue {
 
     final Map<String, Collection<BlockState>> values = new HashMap<>();
 
-    public BlockQueue(final Stream<String> worlds) {
+    public BlockQueue(final Collection<String> worlds) {
         worlds.forEach(
             w -> values.put(w, Collections.synchronizedList(new ArrayList<>()))
         );

@@ -3,7 +3,7 @@ package ru.gtncraft.bogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.util.stream.Stream;
+import java.util.Collection;
 
 public class Config extends YamlConfiguration {
 
@@ -12,8 +12,8 @@ public class Config extends YamlConfiguration {
         this.addDefaults(config.getRoot());
     }
 
-    public Stream<String> getHosts() {
-        return getStringList("mongodb.hosts").stream();
+    public Collection<String> getHosts() {
+        return getStringList("mongodb.hosts");
     }
 
     public boolean getSSL() {
@@ -24,7 +24,7 @@ public class Config extends YamlConfiguration {
         return getString("mongodb.name");
     }
 
-    public Stream<String> getWorlds() {
-        return getStringList("worlds").stream().map(String::toLowerCase);
+    public Collection<String> getWorlds() {
+        return getStringList("worlds");
     }
 }

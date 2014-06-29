@@ -30,7 +30,7 @@ class Listeners implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     @SuppressWarnings("unused")
-    public void onBlockBreak(final BlockBreakEvent event) {
+    void onBlockBreak(final BlockBreakEvent event) {
         final Block block = event.getBlock();
         final World world = block.getWorld();
         plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), -1));
@@ -38,23 +38,22 @@ class Listeners implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     @SuppressWarnings("unused")
-    public void onBlockPlace(final BlockPlaceEvent event) {
-        final Block block = event.getBlock();
-        final World world = block.getWorld();
+    void onBlockPlace(final BlockPlaceEvent event) {
+        Block block = event.getBlock();
+        World world = block.getWorld();
         plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), 1));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     @SuppressWarnings("unused")
-    public void onPlayerInteract(final PlayerInteractEvent event) {
+    void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-            final Player player = event.getPlayer();
+            Player player = event.getPlayer();
             if (player.getItemInHand().getType() == material) {
-                final World world = player.getWorld();
-                final BlockState query = new BlockState(event.getClickedBlock().getLocation());
+                Location clickedBlock = event.getClickedBlock().getLocation().clone();
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-                    for (BlockState state : plugin.getStorage().find(world, query)) {
-                        String message = dateFormat.format(state.getDatetime()) + " ";
+                    for (BlockState state : plugin.getStorage().find(clickedBlock)) {
+                        String message = dateFormat.format(state.getDate()) + " ";
                         message += state.getPlayer().getName() + " ";
                         message += state.getBlock() + " ";
                         message += state.getAction() > 0 ? "place" : "break";

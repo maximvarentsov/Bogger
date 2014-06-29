@@ -2,7 +2,7 @@ mongodb:
   hosts:
   - localhost:27017
   ssl: false
-  database: bogger
+  name: bogger
 results: 10
 tool: YELLOW_FLOWER
 worlds:
