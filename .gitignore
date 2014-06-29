@@ -29,3 +29,7 @@
 *.ipr
 *.iws
 .idea/
+
+# maven stuff
+/dependency-reduced-pom.xml
+
