@@ -23,10 +23,10 @@ class BlockState implements ConvertibleToDocument {
 
     public BlockState(final Block block, final Player player, final int action) {
         document = new Document("_id", new ObjectId());
-        this.setLocation(block.getLocation());
-        this.setBlock(block);
-        this.setPlayer(player);
-        this.setAction(action);
+        setLocation(block.getLocation());
+        setBlock(block);
+        setPlayer(player);
+        setAction(action);
     }
 
     void setLocation(final Location location) {

@@ -17,7 +17,7 @@ class Listeners implements Listener {
 
     final Material material;
     final Bogger plugin;
-    final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    final static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     public Listeners(final Bogger plugin) {
         material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
