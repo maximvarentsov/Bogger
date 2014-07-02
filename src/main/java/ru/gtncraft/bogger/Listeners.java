@@ -28,7 +28,7 @@ class Listeners implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     @SuppressWarnings("unused")
     void onBlockBreak(final BlockBreakEvent event) {
         final Block block = event.getBlock();
@@ -36,7 +36,7 @@ class Listeners implements Listener {
         plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), -1));
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     @SuppressWarnings("unused")
     void onBlockPlace(final BlockPlaceEvent event) {
         Block block = event.getBlock();
@@ -44,7 +44,7 @@ class Listeners implements Listener {
         plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), 1));
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     @SuppressWarnings("unused")
     void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
