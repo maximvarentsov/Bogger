@@ -2,10 +2,16 @@ package ru.gtncraft.bogger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCursor;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.operation.Index;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.mongodb.*;
-import org.mongodb.connection.ServerAddress;
+import org.mongodb.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,9 +34,9 @@ class Storage implements AutoCloseable {
             hosts.add(new ServerAddress(host));
         }
 
-        client = MongoClients.create(
+        client = new MongoClient(
                 hosts,
-                MongoClientOptions.builder().SSLEnabled(plugin.getConfig().getSSL()).build()
+                MongoClientOptions.builder().sslEnabled(plugin.getConfig().getSSL()).build()
         );
 
         db = client.getDatabase(plugin.getConfig().getDatabase());
