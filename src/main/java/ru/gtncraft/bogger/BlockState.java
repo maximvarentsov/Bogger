@@ -13,62 +13,39 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-class BlockState implements ConvertibleToDocument {
-
-    final Document document;
-
+class BlockState extends Document {
     public BlockState(final Map<String, Object> map) {
-        document = new Document(map);
+        putAll(map);
     }
 
-    public BlockState(final Block block, final Player player, final int action) {
-        document = new Document("_id", new ObjectId());
-        setLocation(block.getLocation());
-        setBlock(block);
-        setPlayer(player);
-        setAction(action);
-    }
-
-    void setLocation(final Location location) {
-        document.put("x", location.getX());
-        document.put("y", location.getY());
-        document.put("z", location.getZ());
-    }
-
-    void setPlayer(final Player player) {
-        document.put("uuid", player.getUniqueId().toString());
-    }
-
-    void setAction(int value) {
-        document.put("action", value);
-    }
-
-    void setBlock(final Block block) {
+    public BlockState(Block block, UUID uuid, int action) {
+        put("_id", new ObjectId());
+        Location location = block.getLocation();
+        put("x", location.getBlockX());
+        put("y", location.getBlockY());
+        put("z", location.getBlockZ());
+        put("action", action);
+        put("uuid", uuid.toString());
         if (block.getData() > 0) {
-            document.put("block", block.getType().name() + ":" + block.getData());
+            put("block", block.getType().name() + ":" + block.getData());
         } else {
-            document.put("block", block.getType().name());
+            put("block", block.getType().name());
         }
     }
 
     public String getBlock() {
-        return document.getString("block");
+        return getString("block");
     }
 
     public Date getDate() {
-        return document.getObjectId("_id").getDate();
+        return getObjectId("_id").getDate();
     }
 
     public OfflinePlayer getPlayer() {
-        return Bukkit.getOfflinePlayer(UUID.fromString(document.getString("uuid")));
+        return Bukkit.getOfflinePlayer(UUID.fromString(getString("uuid")));
     }
 
     public int getAction() {
-        return document.getInteger("action");
-    }
-
-    @Override
-    public Document toDocument() {
-        return document;
+        return getInteger("action");
     }
 }

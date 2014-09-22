@@ -5,17 +5,16 @@ import org.bukkit.World;
 import java.util.*;
 
 class BlockQueue {
+    private final Map<String, List<BlockState>> values = new HashMap<>();
 
-    final Map<String, Collection<BlockState>> values = new HashMap<>();
-
-    public BlockQueue(final Collection<String> worlds) {
+    public BlockQueue(final List<String> worlds) {
         worlds.forEach(
             w -> values.put(w, Collections.synchronizedList(new ArrayList<>()))
         );
     }
 
-    public Map<String, Collection<BlockState>> flush() {
-        Map<String, Collection<BlockState>> result = new HashMap<>();
+    public Map<String, List<BlockState>> flush() {
+        Map<String, List<BlockState>> result = new HashMap<>();
         values.entrySet().forEach(entry -> {
             for (Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext();) {
                 if (!result.containsKey(entry.getKey())) {

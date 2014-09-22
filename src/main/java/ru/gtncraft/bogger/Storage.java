@@ -4,13 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCursor;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
+import com.mongodb.client.model.FindOptions;
 import com.mongodb.operation.Index;
+
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.mongodb.Document;
 
 import java.io.IOException;
@@ -20,68 +23,56 @@ import java.util.LinkedList;
 import java.util.List;
 
 class Storage implements AutoCloseable {
-
-    final int maxResult;
-    final MongoClient client;
-    final MongoDatabase db;
+    private final MongoClient client;
+    private final MongoDatabase db;
+    private final FindOptions findOptions;
 
     public Storage(final Bogger plugin) throws IOException {
+        FileConfiguration config = plugin.getConfig();
 
-        maxResult = plugin.getConfig().getInt("results");
+        findOptions = new FindOptions().limit(config.getInt("results")).sort(new Document("_id", -1));
 
         List<ServerAddress> hosts = new ArrayList<>();
-        for (String host : plugin.getConfig().getHosts()) {
+        for (String host : config.getStringList("mongodb.hosts")) {
             hosts.add(new ServerAddress(host));
         }
 
-        client = new MongoClient(
-                hosts,
-                MongoClientOptions.builder().sslEnabled(plugin.getConfig().getSSL()).build()
+        client = new MongoClient(hosts,
+            MongoClientOptions.builder().sslEnabled(config.getBoolean("mongodb.ssl")).build()
         );
 
-        db = client.getDatabase(plugin.getConfig().getDatabase());
+        db = client.getDatabase(config.getString("mongodb.name"));
 
-        plugin.getConfig().getWorlds().forEach(this::createIndexes);
+        config.getStringList("worlds").forEach(this::createIndexes);
     }
 
-    public void createIndexes(final String world) {
+    private void createIndexes(String world) {
         getCollection(world).tools().createIndexes(ImmutableList.of(
-            Index.builder().addKey("x").addKey("y").addKey("z").build()
+                Index.builder().addKey("x").addKey("y").addKey("z").build()
         ));
     }
 
-    public void insert(final String world, final Collection<BlockState> documents) {
-        for (BlockState bs : documents) {
-            db.getCollection(world).insert(bs.toDocument());
-        }
+    public void insert(String world, List<BlockState> documents) {
+        db.getCollection(world).insertMany(documents);
     }
 
-    public MongoCollection getCollection(final World world) {
-        return db.getCollection(world.getName());
-    }
-
-    public MongoCollection getCollection(final String world) {
+    public MongoCollection getCollection(String world) {
         return db.getCollection(world);
     }
 
-    public Collection<BlockState> find(final Location location) {
+    public Collection<BlockState> find(Location location) {
         Collection<BlockState> result = new LinkedList<>();
-
-        try (MongoCursor cursor = getCollection(location.getWorld()).find(getQuery(location)).sort(new Document("_id", -1)).limit(maxResult).get()) {
-            while (cursor.hasNext()) {
-                result.add(new BlockState((Document) cursor.next()));
-            }
+        findOptions.criteria(new Document(ImmutableMap.of(
+            "x", location.getBlockX(),
+            "y", location.getBlockY(),
+            "z", location.getBlockZ()
+        )));
+        String world = location.getWorld().getName();
+        MongoIterable it = getCollection(world).find(findOptions);
+        for (Object o : it) {
+            result.add(new BlockState((Document) o));
         }
-
         return result;
-    }
-
-    Document getQuery(final Location location) {
-        return new Document(ImmutableMap.of(
-                "x", location.getBlockX(),
-                "y", location.getBlockY(),
-                "z", location.getBlockZ()
-        ));
     }
 
     @Override

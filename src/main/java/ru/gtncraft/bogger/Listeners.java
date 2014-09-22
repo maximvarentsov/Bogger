@@ -12,12 +12,13 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.text.SimpleDateFormat;
+import java.util.UUID;
 
 class Listeners implements Listener {
-
-    final Material material;
-    final Bogger plugin;
-    final static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private final Material material;
+    private final Bogger plugin;
+    private final BlockQueue queue;
 
     public Listeners(final Bogger plugin) {
         material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
@@ -25,15 +26,17 @@ class Listeners implements Listener {
             plugin.getLogger().warning("Logger tool not found or invalid.");
         }
         this.plugin = plugin;
+        queue = plugin.getQueue();
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     @SuppressWarnings("unused")
     void onBlockBreak(final BlockBreakEvent event) {
-        final Block block = event.getBlock();
-        final World world = block.getWorld();
-        plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), -1));
+        Block block = event.getBlock();
+        World world = block.getWorld();
+        UUID uuid = event.getPlayer().getUniqueId();
+        queue.add(world, new BlockState(block, uuid, -1));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -41,7 +44,8 @@ class Listeners implements Listener {
     void onBlockPlace(final BlockPlaceEvent event) {
         Block block = event.getBlock();
         World world = block.getWorld();
-        plugin.getQueue().add(world, new BlockState(block, event.getPlayer(), 1));
+        UUID uuid = event.getPlayer().getUniqueId();
+        queue.add(world, new BlockState(block, uuid, 1));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
