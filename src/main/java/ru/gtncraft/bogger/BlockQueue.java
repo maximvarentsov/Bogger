@@ -1,11 +1,12 @@
 package ru.gtncraft.bogger;
 
 import org.bukkit.World;
+import org.mongodb.Document;
 
 import java.util.*;
 
 class BlockQueue {
-    private final Map<String, List<BlockState>> values = new HashMap<>();
+    private final Map<String, List<Document>> values = new HashMap<>();
 
     public BlockQueue(final List<String> worlds) {
         worlds.forEach(
@@ -13,10 +14,10 @@ class BlockQueue {
         );
     }
 
-    public Map<String, List<BlockState>> flush() {
-        Map<String, List<BlockState>> result = new HashMap<>();
+    public Map<String, List<Document>> flush() {
+        Map<String, List<Document>> result = new HashMap<>();
         values.entrySet().forEach(entry -> {
-            for (Iterator<BlockState> it = entry.getValue().iterator(); it.hasNext();) {
+            for (Iterator<Document> it = entry.getValue().iterator(); it.hasNext();) {
                 if (!result.containsKey(entry.getKey())) {
                     result.put(entry.getKey(), new ArrayList<>());
                 }
@@ -29,7 +30,7 @@ class BlockQueue {
 
     public boolean add(final World world, final BlockState document) {
         if (values.containsKey(world.getName())) {
-            values.get(world.getName()).add(document);
+            values.get(world.getName()).add(document.toDocument());
             return true;
         }
         return false;

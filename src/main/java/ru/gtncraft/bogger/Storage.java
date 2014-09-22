@@ -52,7 +52,7 @@ class Storage implements AutoCloseable {
         ));
     }
 
-    public void insert(String world, List<BlockState> documents) {
+    public void insert(String world, List<Document> documents) {
         db.getCollection(world).insertMany(documents);
     }
 
