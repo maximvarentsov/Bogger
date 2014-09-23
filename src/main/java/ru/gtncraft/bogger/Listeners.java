@@ -2,6 +2,8 @@ package ru.gtncraft.bogger;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,12 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 class Listeners implements Listener {
-    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private final SimpleDateFormat dateFormat;
     private final Material material;
     private final Bogger plugin;
     private final BlockQueue queue;
 
     public Listeners(final Bogger plugin) {
+        dateFormat = new SimpleDateFormat(plugin.getConfig().getString("dateFormat", "dd.MM.yyyy HH:mm:ss"));
         material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
         if (material == null) {
             plugin.getLogger().warning("Logger tool not found or invalid.");

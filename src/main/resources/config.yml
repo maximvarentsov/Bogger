@@ -5,6 +5,7 @@ mongodb:
   name: bogger
 results: 10
 tool: YELLOW_FLOWER
+dateFormat: dd.MM.yyyy HH:mm:ss
 worlds:
  - world
  - world_nether
