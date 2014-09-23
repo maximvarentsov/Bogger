@@ -7,18 +7,18 @@ import org.mongodb.Document;
 import java.util.*;
 
 class BlockQueue {
-    private final Map<String, List<Document>> blocks = new HashMap<>();
+    private final Map<String, List<Document>> blocks = new HashMap<String, List<Document>>();
 
     public BlockQueue(final Bogger plugin) {
         for (String world : plugin.getConfig().getStringList("worlds")) {
-            blocks.put(world, Collections.synchronizedList(new ArrayList<>()));
+            blocks.put(world, Collections.synchronizedList(new ArrayList<Document>()));
         }
         Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
                 for (Map.Entry<String, List<Document>> entry : blocks.entrySet()) {
                     String world = entry.getKey();
-                    List<Document> blocks = new ArrayList<>();
+                    List<Document> blocks = new ArrayList<Document>();
                     for (Iterator<Document> it = entry.getValue().iterator(); it.hasNext();) {
                         blocks.add(it.next());
                         it.remove();

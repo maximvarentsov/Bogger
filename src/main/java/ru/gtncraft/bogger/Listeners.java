@@ -51,9 +51,9 @@ class Listeners implements Listener {
     @SuppressWarnings("unused")
     void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-            Player player = event.getPlayer();
+            final Player player = event.getPlayer();
             if (player.getItemInHand().getType() == material) {
-                Location clickedBlock = event.getClickedBlock().getLocation().clone();
+                final Location clickedBlock = event.getClickedBlock().getLocation().clone();
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {

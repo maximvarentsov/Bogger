@@ -1,7 +1,6 @@
 package ru.gtncraft.bogger;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
@@ -16,10 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.mongodb.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 class Storage implements AutoCloseable {
     private final MongoClient client;
@@ -31,7 +27,7 @@ class Storage implements AutoCloseable {
 
         findOptions = new FindOptions().limit(config.getInt("results")).sort(new Document("_id", -1));
 
-        List<ServerAddress> hosts = new ArrayList<>();
+        List<ServerAddress> hosts = new ArrayList<ServerAddress>();
         for (String host : config.getStringList("mongodb.hosts")) {
             hosts.add(new ServerAddress(host));
         }
@@ -49,7 +45,7 @@ class Storage implements AutoCloseable {
 
     private void createIndexes(String world) {
         getCollection(world).tools().createIndexes(ImmutableList.of(
-                Index.builder().addKey("x").addKey("y").addKey("z").build()
+            Index.builder().addKey("x").addKey("y").addKey("z").build()
         ));
     }
 
@@ -61,13 +57,13 @@ class Storage implements AutoCloseable {
         return db.getCollection(world);
     }
 
-    public Collection<BlockState> find(Location location) {
-        Collection<BlockState> result = new LinkedList<>();
-        findOptions.criteria(new Document(ImmutableMap.of(
-            "x", location.getBlockX(),
-            "y", location.getBlockY(),
-            "z", location.getBlockZ()
-        )));
+    public Collection<BlockState> find(final Location location) {
+        Collection<BlockState> result = new LinkedList<BlockState>();
+        findOptions.criteria(new Document(new HashMap<String, Object>() {{
+            put("x", location.getBlockX());
+            put("y", location.getBlockY());
+            put("z", location.getBlockZ());
+        }}));
         String world = location.getWorld().getName();
         MongoIterable it = getCollection(world).find(findOptions);
         for (Object o : it) {
