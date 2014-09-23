@@ -12,7 +12,6 @@ import com.mongodb.client.model.FindOptions;
 import com.mongodb.operation.Index;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.mongodb.Document;
 
@@ -43,7 +42,9 @@ class Storage implements AutoCloseable {
 
         db = client.getDatabase(config.getString("mongodb.name"));
 
-        config.getStringList("worlds").forEach(this::createIndexes);
+        for (String world : config.getStringList("worlds")) {
+            createIndexes(world);
+        }
     }
 
     private void createIndexes(String world) {

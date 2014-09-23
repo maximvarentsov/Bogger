@@ -2,8 +2,6 @@ package ru.gtncraft.bogger;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,7 +18,6 @@ class Listeners implements Listener {
     private final SimpleDateFormat dateFormat;
     private final Material material;
     private final Bogger plugin;
-    private final BlockQueue queue;
 
     public Listeners(final Bogger plugin) {
         dateFormat = new SimpleDateFormat(plugin.getConfig().getString("dateFormat", "dd.MM.yyyy HH:mm:ss"));
@@ -29,7 +26,6 @@ class Listeners implements Listener {
             plugin.getLogger().warning("Logger tool not found or invalid.");
         }
         this.plugin = plugin;
-        queue = plugin.getQueue();
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -39,7 +35,7 @@ class Listeners implements Listener {
         Block block = event.getBlock();
         World world = block.getWorld();
         UUID uuid = event.getPlayer().getUniqueId();
-        queue.add(world, new BlockState(block, uuid, -1));
+        plugin.getQueue().add(world, new BlockState(block, uuid, -1));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -48,7 +44,7 @@ class Listeners implements Listener {
         Block block = event.getBlock();
         World world = block.getWorld();
         UUID uuid = event.getPlayer().getUniqueId();
-        queue.add(world, new BlockState(block, uuid, 1));
+        plugin.getQueue().add(world, new BlockState(block, uuid, 1));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -58,13 +54,16 @@ class Listeners implements Listener {
             Player player = event.getPlayer();
             if (player.getItemInHand().getType() == material) {
                 Location clickedBlock = event.getClickedBlock().getLocation().clone();
-                Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-                    for (BlockState state : plugin.getStorage().find(clickedBlock)) {
-                        String message = dateFormat.format(state.getDate()) + " ";
-                        message += state.getPlayer().getName() + " ";
-                        message += state.getBlock() + " ";
-                        message += state.getAction() > 0 ? "place" : "break";
-                        player.sendMessage(ChatColor.DARK_AQUA + message);
+                Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        for (BlockState state : plugin.getStorage().find(clickedBlock)) {
+                            String message = dateFormat.format(state.getDate()) + " ";
+                            message += state.getPlayer().getName() + " ";
+                            message += state.getBlock() + " ";
+                            message += state.getAction() > 0 ? "place" : "break";
+                            player.sendMessage(ChatColor.DARK_AQUA + message);
+                        }
                     }
                 });
                 event.setCancelled(true);

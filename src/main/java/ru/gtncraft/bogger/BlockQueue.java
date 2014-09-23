@@ -1,36 +1,39 @@
 package ru.gtncraft.bogger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.mongodb.Document;
 
 import java.util.*;
 
 class BlockQueue {
-    private final Map<String, List<Document>> values = new HashMap<>();
+    private final Map<String, List<Document>> blocks = new HashMap<>();
 
-    public BlockQueue(final List<String> worlds) {
-        worlds.forEach(
-            w -> values.put(w, Collections.synchronizedList(new ArrayList<>()))
-        );
-    }
-
-    public Map<String, List<Document>> flush() {
-        Map<String, List<Document>> result = new HashMap<>();
-        values.entrySet().forEach(entry -> {
-            for (Iterator<Document> it = entry.getValue().iterator(); it.hasNext();) {
-                if (!result.containsKey(entry.getKey())) {
-                    result.put(entry.getKey(), new ArrayList<>());
+    public BlockQueue(final Bogger plugin) {
+        for (String world : plugin.getConfig().getStringList("worlds")) {
+            blocks.put(world, Collections.synchronizedList(new ArrayList<>()));
+        }
+        Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<String, List<Document>> entry : blocks.entrySet()) {
+                    String world = entry.getKey();
+                    List<Document> blocks = new ArrayList<>();
+                    for (Iterator<Document> it = entry.getValue().iterator(); it.hasNext();) {
+                        blocks.add(it.next());
+                        it.remove();
+                    }
+                    if (blocks.size() > 0) {
+                        plugin.getStorage().insert(world, blocks);
+                    }
                 }
-                result.get(entry.getKey()).add(it.next());
-                it.remove();
             }
-        });
-        return result;
+        }, 120L, 40L);
     }
 
     public boolean add(final World world, final BlockState document) {
-        if (values.containsKey(world.getName())) {
-            values.get(world.getName()).add(document.toDocument());
+        if (blocks.containsKey(world.getName())) {
+            blocks.get(world.getName()).add(document.toDocument());
             return true;
         }
         return false;

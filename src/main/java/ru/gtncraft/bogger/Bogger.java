@@ -9,15 +9,10 @@ public final class Bogger extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-
-        queue = new BlockQueue(getConfig().getStringList("worlds"));
-        new Listeners(this);
-
         try {
             storage = new Storage(this);
-            getServer().getScheduler().runTaskTimerAsynchronously(this, () ->
-                getQueue().flush().entrySet().forEach(entry -> getStorage().insert(entry.getKey(), entry.getValue())),
-            0L, 40L);
+            queue = new BlockQueue(this);
+            new Listeners(this);
         } catch (Exception ex) {
             setEnabled(false);
             getLogger().severe(ex.getMessage());
