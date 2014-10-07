@@ -47,7 +47,7 @@ class Listeners implements Listener {
         plugin.getQueue().add(world, new BlockState(block, uuid, 1));
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     @SuppressWarnings("unused")
     void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
