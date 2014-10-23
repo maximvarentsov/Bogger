@@ -1,1 +1,8 @@
-Move to bitbukkit https://bitbucket.org/mete0/gtncraft.bogger
+Bogger
+===========
+Also known as Block Logger.
+Save player action place/break block position and block type.
+
+System Requirements
+===================
+Java 6
