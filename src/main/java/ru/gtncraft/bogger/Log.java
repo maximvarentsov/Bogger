@@ -8,20 +8,16 @@ class Log {
         PLACE(1), BREAK(-1);
         private final int intRepresentation;
 
-        private Action(int intRepresentation)
-        {
+        private Action(int intRepresentation) {
             this.intRepresentation = intRepresentation;
         }
 
-        public int getIntRepresentation()
-        {
+        public int getIntRepresentation() {
             return this.intRepresentation;
         }
 
-        public static Action fromInt(int intRepresentation)
-        {
-            switch (intRepresentation)
-            {
+        public static Action fromInt(int intRepresentation) {
+            switch (intRepresentation) {
                 case 1:
                     return PLACE;
                 case -1:
