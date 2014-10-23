@@ -39,5 +39,3 @@ class LogWorld {
         logs.add(log);
     }
 }
-
-

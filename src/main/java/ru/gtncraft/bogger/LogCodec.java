@@ -55,4 +55,3 @@ class LogCodec implements CollectibleCodec<Log> {
         return Log.class;
     }
 }
-
