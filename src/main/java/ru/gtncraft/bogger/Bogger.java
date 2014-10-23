@@ -67,6 +67,6 @@ public final class Bogger extends JavaPlugin {
             Bukkit.getOfflinePlayer(state.uuid).getName() + " " + state.block + " " + state.action.name();
             result.add(message);
         }
-        return result.toArray(new String[LogWorld.limit]);
+        return result.toArray(new String[result.size()]);
     }
 }
