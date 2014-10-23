@@ -1,7 +1,5 @@
 mongodb:
-  hosts:
-  - localhost:27017
-  ssl: false
+  host: localhost:27017
   name: bogger
 results: 10
 tool: YELLOW_FLOWER

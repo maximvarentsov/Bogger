@@ -1,26 +1,12 @@
-package ru.gtncraft.bogger.codecs;
+package ru.gtncraft.bogger;
 
 import org.bson.BsonObjectId;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
-import org.bson.codecs.Codec;
 import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecProvider;
-import org.bson.codecs.configuration.CodecRegistry;
 import org.bukkit.Location;
-
-public class LocationCodecProvider implements CodecProvider {
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-        if (clazz.equals(Location.class)) {
-            return (Codec<T>) new LocationCodec();
-        }
-        return null;
-    }
-}
 
 class LocationCodec implements CollectibleCodec<Location> {
     @Override
