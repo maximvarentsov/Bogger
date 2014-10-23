@@ -27,7 +27,7 @@ class Log {
                 case -1:
                     return BREAK;
             }
-            throw new IllegalArgumentException(intRepresentation + " is not a valid index Order");
+            throw new IllegalArgumentException(intRepresentation + " is not a valid index Action");
         }
     }
 
