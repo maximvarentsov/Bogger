@@ -10,17 +10,17 @@ import org.bson.types.ObjectId;
 
 class LogCodec implements CollectibleCodec<Log> {
     @Override
-    public boolean documentHasId(final Log document) {
+    public boolean documentHasId(final Log value) {
         return true;
     }
 
     @Override
-    public BsonObjectId getDocumentId(final Log document) {
-        return new BsonObjectId(document.id);
+    public BsonObjectId getDocumentId(final Log value) {
+        return new BsonObjectId(value.id);
     }
 
     @Override
-    public void generateIdIfAbsentFromDocument(final Log person) {
+    public void generateIdIfAbsentFromDocument(final Log value) {
     }
 
     @Override
