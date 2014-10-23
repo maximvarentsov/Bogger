@@ -67,7 +67,7 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
     public Collection<Log> find(Location location) {
         LogWorld log = worlds.get(location.getWorld().getName());
         if (log == null) {
-            return new ArrayList<Log>();
+            return Collections.emptyList();
         }
         return log.find(location);
     }
