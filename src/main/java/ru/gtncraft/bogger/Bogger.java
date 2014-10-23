@@ -31,7 +31,8 @@ public final class Bogger extends JavaPlugin {
 
         loggerTool = Material.matchMaterial(getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
         if (loggerTool == null) {
-            getLogger().warning("Logger tool not found or invalid.");
+            loggerTool = Material.YELLOW_FLOWER;
+            getLogger().warning("Logger tool not set or invalid. Use default.");
         }
 
         for (String world : getConfig().getStringList("worlds")) {
