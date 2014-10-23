@@ -1,20 +1,18 @@
 package ru.gtncraft.bogger;
 
-import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
+import com.mongodb.client.*;
 import com.mongodb.client.model.FindOptions;
-import com.mongodb.operation.Index;
+import org.bson.Document;
 
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.RootCodecRegistry;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.mongodb.Document;
+import ru.gtncraft.bogger.codecs.LocationCodecProvider;
+import ru.gtncraft.bogger.codecs.LogEntryCodecProvider;
 
-import java.io.IOException;
 import java.util.*;
 
 class Storage implements AutoCloseable {
@@ -22,54 +20,39 @@ class Storage implements AutoCloseable {
     private final MongoDatabase db;
     private final FindOptions findOptions;
 
-    public Storage(final Bogger plugin) throws IOException {
-        FileConfiguration config = plugin.getConfig();
+    public Storage(final Bogger plugin) throws Exception {
+        List<CodecProvider> codecs = Arrays.asList(new LocationCodecProvider(), new LogEntryCodecProvider());
+        MongoDatabaseOptions options = MongoDatabaseOptions.builder().codecRegistry(new RootCodecRegistry(codecs)).build();
 
-        findOptions = new FindOptions().limit(config.getInt("results")).sort(new Document("_id", -1));
+        findOptions = new FindOptions().limit(plugin.getConfig().getInt("results")).sort(new Document("_id", -1));
 
         List<ServerAddress> hosts = new ArrayList<ServerAddress>();
-        for (String host : config.getStringList("mongodb.hosts")) {
+        for (String host : plugin.getConfig().getStringList("mongodb.hosts")) {
             hosts.add(new ServerAddress(host));
         }
 
         client = new MongoClient(hosts,
-            MongoClientOptions.builder().sslEnabled(config.getBoolean("mongodb.ssl")).build()
+            MongoClientOptions.builder().sslEnabled(plugin.getConfig().getBoolean("mongodb.ssl")).build()
         );
 
-        db = client.getDatabase(config.getString("mongodb.name"));
+        db = client.getDatabase(plugin.getConfig().getString("mongodb.name"), options);
 
-        for (String world : config.getStringList("worlds")) {
-            createIndexes(world);
+        for (String world : plugin.getConfig().getStringList("worlds")) {
+            getCollection(world).createIndex(new Document("x", 1).append("y", 1).append("z", 1));
         }
     }
 
-    private void createIndexes(String world) {
-        getCollection(world).tools().createIndexes(ImmutableList.of(
-            Index.builder().addKey("x").addKey("y").addKey("z").build()
-        ));
+    public void insert(String world, List<LogEntry> documents) {
+        getCollection(world).insertMany(documents);
     }
 
-    public void insert(String world, List<Document> documents) {
-        db.getCollection(world).insertMany(documents);
+    public MongoCollection<LogEntry> getCollection(String name) {
+        return db.getCollection(name, LogEntry.class);
     }
 
-    public MongoCollection getCollection(String world) {
-        return db.getCollection(world);
-    }
-
-    public Collection<BlockState> find(final Location location) {
-        Collection<BlockState> result = new LinkedList<BlockState>();
-        findOptions.criteria(new Document(new HashMap<String, Object>() {{
-            put("x", location.getBlockX());
-            put("y", location.getBlockY());
-            put("z", location.getBlockZ());
-        }}));
+    public Collection<LogEntry> find(Location location) {
         String world = location.getWorld().getName();
-        MongoIterable it = getCollection(world).find(findOptions);
-        for (Object o : it) {
-            result.add(new BlockState((Document) o));
-        }
-        return result;
+        return getCollection(world).find(location, findOptions).into(new LinkedList<LogEntry>());
     }
 
     @Override

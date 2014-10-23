@@ -4,14 +4,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Bogger extends JavaPlugin {
     private Storage storage;
-    private BlockQueue queue;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         try {
             storage = new Storage(this);
-            queue = new BlockQueue(this);
             new Listeners(this);
         } catch (Exception ex) {
             setEnabled(false);
@@ -31,9 +29,5 @@ public final class Bogger extends JavaPlugin {
 
     Storage getStorage() {
         return storage;
-    }
-
-    BlockQueue getQueue() {
-        return queue;
     }
 }
