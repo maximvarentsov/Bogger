@@ -24,15 +24,15 @@ class LogWorld {
     }
 
     public int save() {
-        List<Log> values = new ArrayList<Log>();
-        for (Iterator<Log> it = values.iterator(); it.hasNext();) {
-            values.add(it.next());
+        List<Log> result = new ArrayList<Log>();
+        for (Iterator<Log> it = logs.iterator(); it.hasNext();) {
+            result.add(it.next());
             it.remove();
         }
-        if (values.size() > 0) {
-            collection.insertMany(values);
+        if (result.size() > 0) {
+            collection.insertMany(result);
         }
-        return values.size();
+        return result.size();
     }
 
     public void add(Log log) {

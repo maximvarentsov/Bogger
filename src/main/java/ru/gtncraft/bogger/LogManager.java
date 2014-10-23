@@ -39,10 +39,8 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
                     }
                 }
         );
-        MongoDatabaseOptions options = MongoDatabaseOptions.builder().
-                                       codecRegistry(new RootCodecRegistry(codecs)).
-                                       readPreference(ReadPreference.nearest()).
-                                       writeConcern(WriteConcern.SAFE).build();
+        MongoDatabaseOptions options = MongoDatabaseOptions.builder().codecRegistry(new RootCodecRegistry(codecs)).
+                                       readPreference(ReadPreference.nearest()).writeConcern(WriteConcern.SAFE).build();
         db = client.getDatabase(database, options);
     }
 
@@ -56,15 +54,12 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
         if (log == null) {
             return;
         }
-
         UUID uuid = player.getUniqueId();
-        String blockName = block.getType().name();
+        String name = block.getType().name();
         if (block.getData() > 0) {
-            blockName +=":" + block.getData();
+            name +=":" + block.getData();
         }
-
-        Log value = new Log(block.getX(), block.getY(), block.getZ(), action, uuid.toString(), blockName);
-        log.add(value);
+        log.add(new Log(block.getX(), block.getY(), block.getZ(), action, uuid.toString(), name));
     }
 
     public Collection<Log> find(Location location) {
@@ -86,4 +81,3 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
         return worlds.values().iterator();
     }
 }
-
