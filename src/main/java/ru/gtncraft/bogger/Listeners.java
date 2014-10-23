@@ -10,15 +10,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.text.SimpleDateFormat;
-
 class Listeners implements Listener {
-    private final SimpleDateFormat dateFormat;
     private final Material material;
     private final Bogger plugin;
 
     public Listeners(final Bogger plugin) {
-        dateFormat = new SimpleDateFormat(plugin.getConfig().getString("dateFormat", "dd.MM.yyyy HH:mm:ss"));
         material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
         if (material == null) {
             plugin.getLogger().warning("Logger tool not found or invalid.");
@@ -30,13 +26,13 @@ class Listeners implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     @SuppressWarnings("unused")
     public void onBlockBreak(final BlockBreakEvent event) {
-        plugin.logManager.add(event.getBlock(), event.getPlayer(), -1);
+        plugin.blockBreak(event.getBlock(), event.getPlayer());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     @SuppressWarnings("unused")
     public void onBlockPlace(final BlockPlaceEvent event) {
-        plugin.logManager.add(event.getBlock(), event.getPlayer(), 1);
+        plugin.blockPaste(event.getBlock(), event.getPlayer());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -49,13 +45,7 @@ class Listeners implements Listener {
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        for (Log state : plugin.logManager.find(clickedBlock)) {
-                            String message = dateFormat.format(state.id.getDate()) + " ";
-                            message += Bukkit.getOfflinePlayer(state.uuid).getName() + " ";
-                            message += state.block + " ";
-                            message += state.action == 1 ? "place" : "break";
-                            player.sendMessage(ChatColor.DARK_AQUA + message);
-                        }
+                        player.sendMessage(plugin.history(clickedBlock));
                     }
                 });
                 event.setCancelled(true);

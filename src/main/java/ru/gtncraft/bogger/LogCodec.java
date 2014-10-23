@@ -30,7 +30,7 @@ class LogCodec implements CollectibleCodec<Log> {
         writer.writeInt32("x", value.x);
         writer.writeInt32("y", value.y);
         writer.writeInt32("z", value.z);
-        writer.writeInt32("action", value.action);
+        writer.writeInt32("action", value.action.getIntRepresentation());
         writer.writeString("uuid", value.uuid.toString());
         writer.writeString("block", value.block);
         writer.writeEndDocument();
@@ -47,7 +47,7 @@ class LogCodec implements CollectibleCodec<Log> {
         String uuid = reader.readString("uuid");
         String block = reader.readString("block");
         reader.readEndDocument();
-        return new Log(id, x, y, z, action, uuid, block);
+        return new Log(id, x, y, z, Log.Action.fromInt(action), uuid, block);
     }
 
     @Override

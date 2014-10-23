@@ -7,8 +7,6 @@ import org.bukkit.Location;
 
 import java.util.*;
 
-import static com.mongodb.operation.OrderBy.DESC;
-
 class LogWorld {
     private final List<Log> logs = Collections.synchronizedList(new ArrayList<Log>());
     private final MongoCollection<Log> collection;
@@ -17,7 +15,7 @@ class LogWorld {
 
     public LogWorld(MongoCollection<Log> collection) {
         this.collection = collection;
-        this.findOptions = new FindOptions().limit(limit).sort(new Document("_id", DESC));
+        this.findOptions = new FindOptions().limit(limit).sort(new Document("_id", -1));
         this.collection.createIndex(new Document("x", 1).append("y", 1).append("z", 1));
     }
 
@@ -25,7 +23,7 @@ class LogWorld {
         return collection.find(location, findOptions).into(new LinkedList<Log>());
     }
 
-    public void save() {
+    public int save() {
         List<Log> values = new ArrayList<Log>();
         for (Iterator<Log> it = values.iterator(); it.hasNext();) {
             values.add(it.next());
@@ -34,6 +32,7 @@ class LogWorld {
         if (values.size() > 0) {
             collection.insertMany(values);
         }
+        return values.size();
     }
 
     public void add(Log log) {

@@ -1,6 +1,8 @@
 package ru.gtncraft.bogger;
 
 import com.mongodb.MongoClient;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoDatabaseOptions;
@@ -10,7 +12,6 @@ import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.configuration.RootCodecRegistry;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -38,7 +39,10 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
                     }
                 }
         );
-        MongoDatabaseOptions options = MongoDatabaseOptions.builder().codecRegistry(new RootCodecRegistry(codecs)).build();
+        MongoDatabaseOptions options = MongoDatabaseOptions.builder().
+                                       codecRegistry(new RootCodecRegistry(codecs)).
+                                       readPreference(ReadPreference.nearest()).
+                                       writeConcern(WriteConcern.SAFE).build();
         db = client.getDatabase(database, options);
     }
 
@@ -47,22 +51,28 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
         worlds.put(world, new LogWorld(collection));
     }
 
-    public void add(Block block, Player player, int action) {
-        World world = block.getWorld();
-        if (worlds.containsKey(world.getName())) {
-            UUID uuid = player.getUniqueId();
-            String blockName = block.getType().name();
-            if (block.getData() > 0) {
-                blockName +=":" + block.getData();
-            }
-            Log value = new Log(block.getX(), block.getY(), block.getZ(), action, uuid.toString(), blockName);
-            worlds.get(world.getName()).add(value);
+    public void add(Block block, Player player, Log.Action action) {
+        LogWorld log = worlds.get(block.getWorld().getName());
+        if (log == null) {
+            return;
         }
+
+        UUID uuid = player.getUniqueId();
+        String blockName = block.getType().name();
+        if (block.getData() > 0) {
+            blockName +=":" + block.getData();
+        }
+
+        Log value = new Log(block.getX(), block.getY(), block.getZ(), action, uuid.toString(), blockName);
+        log.add(value);
     }
 
     public Collection<Log> find(Location location) {
-        String world = location.getWorld().getName();
-        return worlds.get(world).find(location);
+        LogWorld log = worlds.get(location.getWorld().getName());
+        if (log == null) {
+            return new ArrayList<Log>();
+        }
+        return log.find(location);
     }
 
     @Override
