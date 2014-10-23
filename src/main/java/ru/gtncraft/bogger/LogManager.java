@@ -57,7 +57,7 @@ class LogManager implements AutoCloseable, Iterable<LogWorld> {
         UUID uuid = player.getUniqueId();
         String name = block.getType().name();
         if (block.getData() > 0) {
-            name +=":" + block.getData();
+            name += ":" + block.getData();
         }
         log.add(new Log(block.getX(), block.getY(), block.getZ(), action, uuid.toString(), name));
     }

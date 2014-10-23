@@ -11,16 +11,11 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 class Listeners implements Listener {
-    private final Material material;
     private final Bogger plugin;
 
     public Listeners(final Bogger plugin) {
-        material = Material.matchMaterial(plugin.getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
-        if (material == null) {
-            plugin.getLogger().warning("Logger tool not found or invalid.");
-        }
-        this.plugin = plugin;
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+        this.plugin = plugin;
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -40,7 +35,7 @@ class Listeners implements Listener {
     public void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             final Player player = event.getPlayer();
-            if (player.getItemInHand().getType() == material) {
+            if (player.getItemInHand().getType() == plugin.getLoggerTool()) {
                 final Location clickedBlock = event.getClickedBlock().getLocation().clone();
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override

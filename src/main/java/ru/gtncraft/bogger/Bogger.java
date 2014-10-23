@@ -3,6 +3,7 @@ package ru.gtncraft.bogger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 public final class Bogger extends JavaPlugin {
     private LogManager logManager;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(getConfig().getString("dateFormat", "dd.MM.yyyy HH:mm:ss"));
+    private Material loggerTool;
 
     @Override
     public void onEnable() {
@@ -26,6 +28,11 @@ public final class Bogger extends JavaPlugin {
         }
 
         LogWorld.limit = getConfig().getInt("results", 10);
+
+        loggerTool = Material.matchMaterial(getConfig().getString("tool", Material.YELLOW_FLOWER.name()));
+        if (loggerTool == null) {
+            getLogger().warning("Logger tool not found or invalid.");
+        }
 
         for (String world : getConfig().getStringList("worlds")) {
             logManager.register(world);
@@ -68,5 +75,9 @@ public final class Bogger extends JavaPlugin {
             result.add(message);
         }
         return result.toArray(new String[result.size()]);
+    }
+
+    public Material getLoggerTool() {
+        return loggerTool;
     }
 }
